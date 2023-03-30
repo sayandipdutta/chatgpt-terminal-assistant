@@ -33,7 +33,6 @@ class Assistant:
     def new_question(cls, question: str):
         message: Message = {"role": "user", "content": question}
         cls.conversation.append(message)
-        # FIX: Handle API connection error
         response = cls.handle_response(cls.conversation)
         if not response:
             answer = "[red]No response received!!"
