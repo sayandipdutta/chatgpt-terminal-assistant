@@ -9,6 +9,7 @@ from rich.panel import Panel
 
 
 MODEL: Literal["gpt-3.5-turbo"] = "gpt-3.5-turbo"
+MAX_CONVERSATION_LENGTH: Literal[2] = 2
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
 # TODO: tokenize messages using tiktoken to calculate no of tokens.
@@ -113,6 +114,9 @@ class Assistant:
         return reply, answer, total_tokens
 
 
-for user_input in iter(lambda: input("> "), ""):
-    Assistant.new_session()
+Assistant.new_session()
+for i, user_input in enumerate(iter(lambda: input("> "), "")):
     Assistant.new_question(user_input)
+    if i >= MAX_CONVERSATION_LENGTH:
+        print("Conversation limit reached. Please start a new session.")
+        break
