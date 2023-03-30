@@ -32,6 +32,7 @@ class Assistant:
     def new_question(cls, question: str):
         message: Message = {'role': 'user', 'content': question}
         cls.conversation.append(message)
+        # FIX: Handle API connection error
         response = openai.ChatCompletion.create(
             model=MODEL,
             messages=cls.conversation,
@@ -43,13 +44,15 @@ class Assistant:
     @staticmethod
     def process_response(response) -> tuple[Message, str, int]:
         color = '[red]'
-        if response.choices[0].finish_reason == 'stop':
-            color = '[green]'
-            pass
-        reply: Message = response.choices[0].message
+        reply: Message = {'role': 'assistant', 'content': 'Sorry! Could not process response!!'}
         total_tokens = response.usage.total_tokens
 
+        if response.choices[0].finish_reason == 'stop':
+            color = '[green]'
+            reply = response.choices[0].message
+
         answer = color + reply['content']
+
         return reply, answer, total_tokens
 
 
