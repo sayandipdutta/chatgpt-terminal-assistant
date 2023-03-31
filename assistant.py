@@ -19,7 +19,7 @@ HISTORY = args.history
 # TODO: Create config file
 MODEL: Literal["gpt-3.5-turbo"] = "gpt-3.5-turbo"
 MAX_HISTORY_LEN: Literal[5] = 5
-MAX_RETRY: Literal[5] = 5
+MAX_RETRY: Literal[3] = 3
 
 assert (
     0 < HISTORY < MAX_HISTORY_LEN
