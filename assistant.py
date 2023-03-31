@@ -1,3 +1,4 @@
+from argparse import ArgumentParser
 import os
 import time
 from typing import Literal, TypedDict
@@ -8,12 +9,22 @@ from rich import print
 from rich.panel import Panel
 
 
+parser = ArgumentParser()
+parser.add_argument("-h", "history", default=1, type=int)
+
+args = parser.parse_args()
+HISTORY = args.history
+
 MODEL: Literal["gpt-3.5-turbo"] = "gpt-3.5-turbo"
-MAX_CONVERSATION_LENGTH: Literal[2] = 2
-openai.api_key = os.environ["OPENAI_API_KEY"]
+MAX_HISTORY_LEN: Literal[5] = 5
+
+assert (
+    0 < HISTORY < MAX_HISTORY_LEN
+), f"history must be a number between 1 and {MAX_HISTORY_LEN}"
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # TODO: tokenize messages using tiktoken to calculate no of tokens.
-# print(response)
 
 
 class Message(TypedDict):
