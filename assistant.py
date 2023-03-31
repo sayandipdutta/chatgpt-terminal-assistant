@@ -62,48 +62,27 @@ class Assistant:
                 model=MODEL,
                 messages=history,
             )
-        except openai.error.Timeout as e:
-            # Handle timeout error, e.g. retry or log
-            print(f"OpenAI API request timed out: {e}")
-            if retry < 5:
-                print(f"Retrying after 5 seconds.")
-                time.sleep(5)
-                retry += 1
-                Assistant.handle_response(history, retry)
-            return {}
-        except openai.error.APIError as e:
-            # Handle API error, e.g. retry or log
-            print(f"OpenAI API returned an API Error: {e}")
-            if retry < 5:
-                print(f"Retrying after 5 seconds.")
-                time.sleep(5)
-                retry += 1
-                Assistant.handle_response(history, retry)
-            return {}
-        except openai.error.APIConnectionError as e:
-            # Handle connection error, e.g. check network or log
-            print(f"OpenAI API request failed to connect: {e}")
-            return {}
-        except openai.error.InvalidRequestError as e:
-            # Handle invalid request error, e.g. validate parameters or log
-            print(f"OpenAI API request was invalid: {e}")
-            return {}
-        except openai.error.AuthenticationError as e:
-            # Handle authentication error, e.g. check credentials or log
-            print(f"OpenAI API request was not authorized: {e}")
-            return {}
-        except openai.error.PermissionError as e:
-            # Handle permission error, e.g. check scope or log
-            print(f"OpenAI API request was not permitted: {e}")
-            return {}
-        except openai.error.RateLimitError as e:
+        except (
+            openai.error.Timeout,  # type: ignore
+            openai.error.APIError,  # type: ignore
+            openai.error.RateLimitError,  # type:ignore
+        ) as e:
             # Handle rate limit error, e.g. wait or log
-            print(f"OpenAI API request exceeded rate limit: {e}")
+            print(f"Error: {e}")
             if retry < 5:
                 print(f"Retrying after 5 seconds.")
                 time.sleep(5)
                 retry += 1
                 Assistant.handle_response(history, retry)
+            return {}
+        except (
+            openai.error.PermissionError,  # type: ignore
+            openai.error.AuthenticationError,  # type: ignore
+            openai.error.APIConnectionError,  # type: ignore
+            openai.error.InvalidRequestError,  # type: ignore
+        ) as e:
+            # Handle connection error, e.g. check network or log
+            print(f"OpenAI error: {e}")
             return {}
         return response
 
@@ -126,8 +105,9 @@ class Assistant:
 
 
 Assistant.new_session()
+
 for i, user_input in enumerate(iter(lambda: input("> "), "")):
     Assistant.new_question(user_input)
-    if i >= MAX_CONVERSATION_LENGTH:
+    if i >= HISTORY:
         print("Conversation limit reached. Please start a new session.")
         break
