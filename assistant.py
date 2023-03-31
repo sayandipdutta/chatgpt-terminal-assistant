@@ -1,6 +1,7 @@
-from argparse import ArgumentParser
 import os
 import time
+
+from argparse import ArgumentParser
 from typing import Literal, TypedDict
 
 import openai
@@ -15,6 +16,7 @@ parser.add_argument("-h", "history", default=1, type=int)
 args = parser.parse_args()
 HISTORY = args.history
 
+# TODO: Create config file
 MODEL: Literal["gpt-3.5-turbo"] = "gpt-3.5-turbo"
 MAX_HISTORY_LEN: Literal[5] = 5
 MAX_RETRY: Literal[5] = 5
@@ -25,7 +27,12 @@ assert (
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+# tokenization
 # TODO: tokenize messages using tiktoken to calculate no of tokens.
+# TODO: store per session token usage in db.
+# UI:
+# TODO: create application welcome text, token usage.
+# TODO: format code blocks and show in rich panel.
 
 
 class Message(TypedDict):
@@ -51,7 +58,7 @@ class Assistant:
             answer = "[red]No response received!!"
             print(Panel(answer, title="Assistant", subtitle=f"0 tokens consumed"))
             quit()
-        reply, answer, tk = cls.process_response(response)
+        reply, answer, tk = cls.parse_response(response)
         cls.conversation.append(reply)
         print(Panel(answer, title="Assistant", subtitle=f"{tk} tokens consumed"))
 
@@ -70,7 +77,7 @@ class Assistant:
         ) as e:
             # Handle rate limit error, e.g. wait or log
             print(f"Error: {e}")
-            if retry < 5:
+            if retry < MAX_RETRY:
                 print(f"Retrying after 5 seconds.")
                 time.sleep(5)
                 retry += 1
@@ -88,7 +95,7 @@ class Assistant:
         return response
 
     @staticmethod
-    def process_response(response) -> tuple[Message, str, int]:
+    def parse_response(response) -> tuple[Message, str, int]:
         color = "[red]"
         reply: Message = {
             "role": "assistant",
