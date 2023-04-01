@@ -11,10 +11,10 @@ from rich.panel import Panel
 
 
 parser = ArgumentParser()
-parser.add_argument("-h", "history", default=1, type=int)
+parser.add_argument("-n", "--nhistory", default=1, type=int)
 
 args = parser.parse_args()
-HISTORY = args.history
+HISTORY = args.nhistory
 
 # TODO: Create config file
 MODEL: Literal["gpt-3.5-turbo"] = "gpt-3.5-turbo"
