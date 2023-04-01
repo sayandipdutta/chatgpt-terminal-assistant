@@ -14,7 +14,6 @@ parser.add_argument("-n", "--nhistory", default=1, type=int)
 args = parser.parse_args()
 HISTORY = args.nhistory
 
-# TODO: Create config file
 MODEL: Literal["gpt-3.5-turbo"] = "gpt-3.5-turbo"
 MAX_HISTORY_LEN: Literal[5] = 5
 MAX_RETRY: Literal[3] = 3
@@ -26,13 +25,6 @@ assert (
 ), f"history must be a number between 1 and {MAX_HISTORY_LEN}"
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
-
-# tokenization
-# TODO: tokenize messages using tiktoken to calculate no of tokens.
-# TODO: store per session token usage in db.
-# UI:
-# TODO: create application welcome text, token usage.
-# TODO: format code blocks and show in rich panel.
 
 
 class Message(TypedDict):
