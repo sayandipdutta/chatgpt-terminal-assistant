@@ -108,7 +108,7 @@ class Assistant:
 Assistant.new_session()
 
 for i, user_input in enumerate(iter(lambda: input("> "), "")):
-    Assistant.new_question(user_input)
     if i >= HISTORY:
         print("Conversation limit reached. Please start a new session.")
         break
+    Assistant.new_question(user_input)
