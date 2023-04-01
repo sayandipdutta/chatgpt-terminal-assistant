@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import Iterator
 
+from rich import print
 from rich.panel import Panel
+from rich.markdown import Markdown
 
 class Renderable(ABC):
     @abstractmethod
@@ -21,6 +23,14 @@ class Code(Renderable):
 
     def render(self) -> Panel:
         return Panel(self.data)
+
+
+def make_markdown(
+    content: str,
+    theme: Literal["solarized-light", "solarized-dark"] = "solarized-light",
+) -> Panel:
+    return Panel(Markdown(content, code_theme=theme))
+
 
 def content_parser(content: str) -> Iterator[Renderable]:
     code_block: list[str] = []
