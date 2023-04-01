@@ -6,9 +6,7 @@ from typing import Literal, TypedDict
 
 import openai
 
-from rich import print
-from rich.panel import Panel
-
+from formatter import format_content
 
 parser = ArgumentParser()
 parser.add_argument("-n", "--nhistory", default=1, type=int)
@@ -20,6 +18,8 @@ HISTORY = args.nhistory
 MODEL: Literal["gpt-3.5-turbo"] = "gpt-3.5-turbo"
 MAX_HISTORY_LEN: Literal[5] = 5
 MAX_RETRY: Literal[3] = 3
+
+THEME: Literal['gruvbox-light'] = "gruvbox-light"
 
 assert (
     0 < HISTORY < MAX_HISTORY_LEN
@@ -54,13 +54,14 @@ class Assistant:
         message: Message = {"role": "user", "content": question}
         cls.conversation.append(message)
         response = cls.handle_response(cls.conversation)
+        tk = 0
         if not response:
             answer = "[red]No response received!!"
-            print(Panel(answer, title="Assistant", subtitle=f"0 tokens consumed"))
+            print(format_content(answer, tokens=tk, theme=THEME))
             quit()
         reply, answer, tk = cls.parse_response(response)
         cls.conversation.append(reply)
-        print(Panel(answer, title="Assistant", subtitle=f"{tk} tokens consumed"))
+        print(format_content(answer, tokens=tk, theme=THEME))
 
     @staticmethod
     def handle_response(history: list[Message], retry: int = 0):
@@ -96,7 +97,6 @@ class Assistant:
 
     @staticmethod
     def parse_response(response) -> tuple[Message, str, int]:
-        color = "[red]"
         reply: Message = {
             "role": "assistant",
             "content": "Sorry! Could not process response!!",
@@ -104,10 +104,9 @@ class Assistant:
         total_tokens = response.usage.total_tokens
 
         if response.choices[0].finish_reason == "stop":
-            color = "[green]"
             reply = response.choices[0].message
 
-        answer = color + reply["content"]
+        answer = reply["content"]
 
         return reply, answer, total_tokens
 
