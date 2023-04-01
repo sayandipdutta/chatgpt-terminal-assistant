@@ -8,6 +8,8 @@ import openai
 
 from formatter import format_content
 
+from rich import print
+
 parser = ArgumentParser()
 parser.add_argument("-n", "--nhistory", default=1, type=int)
 
