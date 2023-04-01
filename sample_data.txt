@@ -1,0 +1,119 @@
+You can create a decorator, like this:
+```
+def checkargs(func):
+    def inner(*args, **kwargs):
+        if 'y' in kwargs:
+            print('y passed with its keyword!')
+        else:
+            print('y passed positionally.')
+        result = func(*args, **kwargs)
+        return result
+    return inner
+
+>>>  @checkargs
+...: def foo(x, y):
+...:     return x + y
+
+>>> foo(2, 3)
+y passed positionally.
+5
+
+>>> foo(2, y=3)
+y passed with its keyword!
+5
+```
+Of course you can improve this by allowing the decorator to accept arguments. Thus you can pass the parameter you want to check for. Which would be something like this:
+```
+def checkargs(param_to_check):
+    def inner(func):
+        def wrapper(*args, **kwargs):
+            if param_to_check in kwargs:
+                print('y passed with its keyword!')
+            else:
+                print('y passed positionally.')
+            result = func(*args, **kwargs)
+            return result
+        return wrapper
+    return inner
+
+>>>  @checkargs(param_to_check='y')
+...: def foo(x, y):
+...:     return x + y
+
+>>> foo(2, y=3)
+y passed with its keyword!
+5
+```
+
+I think adding [`functools.wraps`](https://docs.python.org/3/library/functools.html#functools.wraps) would preserve the annotations, following version also allows to perform the check over all arguments (using [`inspect`](https://docs.python.org/3/library/inspect.html)):
+```
+from functools import wraps
+from inspect import signature
+
+def checkargs(func):
+    @wraps(func)
+    def inner(*args, **kwargs):
+        for param in signature(func).parameters:
+            if param in kwargs:
+                print(param, 'passed with its keyword!')
+            else:
+                print(param, 'passed positionally.')
+        result = func(*args, **kwargs)
+        return result
+    return inner
+
+>>>  @checkargs
+...: def foo(x, y, z) -> int:
+...:     return x + y
+
+>>> foo(2, 3, z=4)
+x passed positionally.
+y passed positionally.
+z passed with its keyword!
+9
+
+>>> inspect.getfullargspec(foo)
+FullArgSpec(args=[], varargs='args', varkw='kwargs', defaults=None, 
+kwonlyargs=[], kwonlydefaults=None, annotations={'return': <class 'int'>})
+                                             _____________HERE____________
+```
+---
+
+# **Update** [Python 3.10](https://docs.python.org/3/whatsnew/3.10.html)
+
+In Python 3.10+ new [`ParamSpec`](https://docs.python.org/3/library/typing.html#typing.ParamSpec) type annotation was introduced ([PEP 612](https://peps.python.org/pep-0612/#concatenating-keyword-parameters)), for better specifying parameter types in higher-order functions. As of now, the correct way to annotate this decorator would be like this:
+```
+from functools import wraps
+from inspect import signature
+from typing import Callable, ParamSpec, TypeVar, TYPE_CHECKING
+
+T = TypeVar("T")
+P = ParamSpec("P")
+
+
+def check_args(func: Callable[P, T]) -> Callable[P, T]:
+    """
+    Decorator to monitor whether an argument is passed
+    positionally or with its keyword, during function call.
+    """
+
+    @wraps(func)
+    def inner(*args: P.args, **kwargs: P.kwargs) -> T:
+        for param in signature(func).parameters:
+            if param in kwargs:
+                print(param, 'passed with its keyword!')
+            else:
+                print(param, 'passed positionally.')
+        return func(*args, **kwargs)
+
+    return inner
+```
+Which correctly preserves type annotation:
+```
+if TYPE_CHECKING:
+    reveal_type(foo(2, 3))
+
+# > mypy check_kwd.py
+# check_kwd.py:34: note: Revealed type is "builtins.int"
+# Success: no issues found in 1 source file
+```
