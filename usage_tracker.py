@@ -24,7 +24,7 @@ def record_usage(tokens: int, time: datetime):
         bfh.write(bytes(record, encoding="utf-8"))
 
 
-def parse_records() -> tuple[bytes, int, float]:
+def load_records() -> tuple[pd.DataFrame, bytes]:
     last_session_details = b""
     with open(LAST_SESSION_DETAILS, "rb") as bfh:
         last_session_details = bfh.read()
@@ -36,5 +36,10 @@ def parse_records() -> tuple[bytes, int, float]:
         parse_dates=True,
         infer_datetime_format=True,
     )
+    return df, last_session_details
+
+
+def summarize_records() -> tuple[bytes, int, float]:
+    df, last_session_details = load_records()
     summary = df.sum().to_dict()
     return last_session_details, int(summary["token_used"]), round(summary["cost"], 2)
