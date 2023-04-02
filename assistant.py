@@ -44,7 +44,7 @@ class Assistant:
         ]
 
     @classmethod
-    def new_question(cls, question: str):
+    def new_question(cls, question: str) -> bool:
         message: Message = {"role": "user", "content": question}
         cls.conversation.append(message)
         response = cls.handle_response(cls.conversation)
@@ -52,10 +52,11 @@ class Assistant:
         if not response:
             answer = "[red]No response received!!"
             print(format_content(answer, tokens=tk, theme=THEME))
-            quit()
+            return False
         reply, answer, tk = cls.parse_response(response)
         cls.conversation.append(reply)
         print(format_content(answer, tokens=tk, theme=THEME))
+        return True
 
     @staticmethod
     def handle_response(history: list[Message], retry: int = 0):
