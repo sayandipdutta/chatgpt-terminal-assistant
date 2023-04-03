@@ -17,6 +17,9 @@ if not USAGE_LOG.exists():
 
 
 def record_usage(tokens: int, time: datetime):
+    assert isinstance(tokens, int) and tokens >= 0
+    if not tokens:
+        return
     cost = tokens * RATE
     record = f"{datetime.strftime(time, '%d-%m-%Y %H:%M:%S')},{tokens},{cost}"
     with open(USAGE_LOG, "a") as fh, open(LAST_SESSION_DETAILS, "wb") as bfh:
