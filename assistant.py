@@ -122,8 +122,12 @@ for i, user_input in enumerate(iter(lambda: input("> "), "")):
     if i >= HISTORY:
         print("Conversation limit reached. Please start a new session.")
         break
+for i, user_input in enumerate(iter(lambda: input("> "), ""), start=1):
     success = Assistant.new_question(user_input)
     if not success:
+        break
+    if i >= history:
+        print("Conversation limit reached. Please start a new session.")
         break
 
 record_usage(Assistant.tokens_consumed, datetime.now())
