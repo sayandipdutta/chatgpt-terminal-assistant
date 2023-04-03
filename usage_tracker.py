@@ -22,6 +22,7 @@ def record_usage(tokens: int, time: datetime):
     with open(USAGE_LOG, "a") as fh, open(LAST_SESSION_DETAILS, "wb") as bfh:
         print(record, file=fh)
         bfh.write(bytes(record, encoding="utf-8"))
+    print(f"Tokens consumed: {tokens}, cost: \N{DOLLAR SIGN}{cost:.5f}")
 
 
 def load_records() -> tuple[pd.DataFrame, bytes]:
