@@ -1,22 +1,21 @@
-from datetime import datetime
 import os
 import time
 
 from argparse import ArgumentParser
+from datetime import datetime
 from typing import Literal, TypedDict
 
 import openai
+from rich import print
 
 from formatter import format_content
 from usage_tracker import record_usage
-
-from rich import print
 
 parser = ArgumentParser()
 parser.add_argument("-n", "--nhistory", default=1, type=int)
 
 args = parser.parse_args()
-HISTORY = args.nhistory
+history = args.nhistory
 
 MODEL: Literal["gpt-3.5-turbo"] = "gpt-3.5-turbo"
 MAX_HISTORY_LEN: Literal[5] = 5
@@ -25,7 +24,7 @@ MAX_RETRY: Literal[3] = 3
 THEME: Literal["gruvbox-light"] = "gruvbox-light"
 
 assert (
-    0 < HISTORY < MAX_HISTORY_LEN
+    0 < history < MAX_HISTORY_LEN
 ), f"history must be a number between 1 and {MAX_HISTORY_LEN}"
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -118,10 +117,6 @@ class Assistant:
 
 Assistant.new_session()
 
-for i, user_input in enumerate(iter(lambda: input("> "), "")):
-    if i >= HISTORY:
-        print("Conversation limit reached. Please start a new session.")
-        break
 for i, user_input in enumerate(iter(lambda: input("> "), ""), start=1):
     success = Assistant.new_question(user_input)
     if not success:
