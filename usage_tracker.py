@@ -7,7 +7,7 @@ PARENT = Path(__file__).parent.resolve() / "usage_stats"
 Path.mkdir(PARENT, exist_ok=True)
 
 USAGE_LOG = PARENT / "usage_log.csv"
-LAST_SESSION_DETAILS = PARENT / "last_session."
+LAST_SESSION_DETAILS = PARENT / "last_session.bin"
 HEADER = "timestamp,token_used,cost"
 RATE = 0.002 / 1000
 
