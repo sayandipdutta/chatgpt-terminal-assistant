@@ -7,8 +7,11 @@ from typing import Literal, TypedDict
 
 import openai
 from rich import print
+from rich.console import Console
 
-from formatter import format_content
+console = Console()
+
+from formatter import format_content, welcome
 from usage_tracker import record_usage
 
 parser = ArgumentParser()
@@ -115,9 +118,10 @@ class Assistant:
         return reply, answer, total_tokens
 
 
+welcome()
 Assistant.new_session()
 
-for i, user_input in enumerate(iter(lambda: input("> "), ""), start=1):
+for i, user_input in enumerate(iter(lambda: console.input("[bold red] > "), ""), start=1):
     success = Assistant.new_question(user_input)
     if not success:
         break
