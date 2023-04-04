@@ -14,6 +14,4 @@ OpenAI's ChatGPT as a terminal assistant.
 At the time of writing this, 'gpt-3.5-turbo' costs `$0.002 for every 1000 tokens`.
 
 # Screenshots
-![Screenshot](/media/assistant.png)
-
-![Screenshot-2](/media/screenshot-2.png)
+![Screenshot-1](/media/screenshot3.png)
