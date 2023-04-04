@@ -7,8 +7,13 @@ from typing import Literal, TypedDict
 
 import openai
 from rich import print
+from rich.console import Console
+from rich.traceback import install
 
-from formatter import format_content
+install(show_locals=True)
+console = Console()
+
+from formatter import format_content, thank_you, welcome
 from usage_tracker import record_usage
 
 parser = ArgumentParser()
@@ -115,14 +120,16 @@ class Assistant:
         return reply, answer, total_tokens
 
 
+welcome(history)
 Assistant.new_session()
 
-for i, user_input in enumerate(iter(lambda: input("> "), ""), start=1):
+for i, user_input in enumerate(iter(lambda: console.input("[bold red] > "), ""), start=1):
     success = Assistant.new_question(user_input)
     if not success:
         break
     if i >= history:
-        print("Conversation limit reached. Please start a new session.")
+        print(f"[i] Conversation limit reached. Please start a new session.[/i]")
         break
 
-record_usage(Assistant.tokens_consumed, datetime.now())
+usage = record_usage(Assistant.tokens_consumed, datetime.now())
+thank_you(usage)
