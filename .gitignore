@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 
 response.txt
+
+usage_stats/last_session.bin
+usage_stats/usage_log.csv

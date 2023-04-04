@@ -2,28 +2,29 @@ import os
 import time
 
 from argparse import ArgumentParser
+from datetime import datetime
 from typing import Literal, TypedDict
 
 import openai
+from rich import print
 
 from formatter import format_content
-
-from rich import print
+from usage_tracker import record_usage
 
 parser = ArgumentParser()
 parser.add_argument("-n", "--nhistory", default=1, type=int)
 
 args = parser.parse_args()
-HISTORY = args.nhistory
+history = args.nhistory
 
 MODEL: Literal["gpt-3.5-turbo"] = "gpt-3.5-turbo"
 MAX_HISTORY_LEN: Literal[5] = 5
 MAX_RETRY: Literal[3] = 3
 
-THEME: Literal['gruvbox-light'] = "gruvbox-light"
+THEME: Literal["gruvbox-light"] = "gruvbox-light"
 
 assert (
-    0 < HISTORY < MAX_HISTORY_LEN
+    0 < history < MAX_HISTORY_LEN
 ), f"history must be a number between 1 and {MAX_HISTORY_LEN}"
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -36,15 +37,17 @@ class Message(TypedDict):
 
 class Assistant:
     conversation: list[Message] = []
+    tokens_consumed: int = 0
 
     @classmethod
     def new_session(cls):
         cls.conversation = [
             {"role": "system", "content": "You are a helpful but curt assistant."},
         ]
+        cls.tokens_consumed = 0
 
     @classmethod
-    def new_question(cls, question: str):
+    def new_question(cls, question: str) -> bool:
         message: Message = {"role": "user", "content": question}
         cls.conversation.append(message)
         response = cls.handle_response(cls.conversation)
@@ -52,13 +55,14 @@ class Assistant:
         if not response:
             answer = "[red]No response received!!"
             print(format_content(answer, tokens=tk, theme=THEME))
-            quit()
+            return False
         reply, answer, tk = cls.parse_response(response)
         cls.conversation.append(reply)
         print(format_content(answer, tokens=tk, theme=THEME))
+        return True
 
-    @staticmethod
-    def handle_response(history: list[Message], retry: int = 0):
+    @classmethod
+    def handle_response(cls, history: list[Message], retry: int = 0):
         # FIX: Add logging
         try:
             response = openai.ChatCompletion.create(
@@ -87,6 +91,12 @@ class Assistant:
             # Handle connection error, e.g. check network or log
             print(f"OpenAI error: {e}")
             return {}
+        else:
+            if usage := getattr(response, "usage"):
+                if tokens := getattr(usage, "total_tokens"):
+                    cls.tokens_consumed += tokens
+        # finally:
+        #     log
         return response
 
     @staticmethod
@@ -107,8 +117,12 @@ class Assistant:
 
 Assistant.new_session()
 
-for i, user_input in enumerate(iter(lambda: input("> "), "")):
-    if i >= HISTORY:
+for i, user_input in enumerate(iter(lambda: input("> "), ""), start=1):
+    success = Assistant.new_question(user_input)
+    if not success:
+        break
+    if i >= history:
         print("Conversation limit reached. Please start a new session.")
         break
-    Assistant.new_question(user_input)
+
+record_usage(Assistant.tokens_consumed, datetime.now())
