@@ -4,6 +4,8 @@ OpenAI's ChatGPT as a terminal assistant.
 * Note: Under active development, expect breaking changes.
 
 # Usage
+
+**Minimum python version: `python 3.11`**
 1. Clone the repo
 2. Install the requirements `pip install -r requirements.txt`
 3. [Get api key from your openai account](https://platform.openai.com/docs/api-reference/authentication).
