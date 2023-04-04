@@ -16,16 +16,16 @@ if not USAGE_LOG.exists():
         print(HEADER, file=fh)
 
 
-def record_usage(tokens: int, time: datetime):
+def record_usage(tokens: int, time: datetime) -> None | str:
     assert isinstance(tokens, int) and tokens >= 0
     if not tokens:
-        return
+        return None
     cost = tokens * RATE
     record = f"{datetime.strftime(time, '%d-%m-%Y %H:%M:%S')},{tokens},{cost}"
     with open(USAGE_LOG, "a") as fh, open(LAST_SESSION_DETAILS, "wb") as bfh:
         print(record, file=fh)
         bfh.write(bytes(record, encoding="utf-8"))
-    print(f"Tokens consumed: {tokens}, cost: \N{DOLLAR SIGN}{cost:.5f}")
+    return f"Tokens consumed: {tokens}, cost: \N{DOLLAR SIGN}{cost:.5f}"
 
 
 def load_records() -> tuple[pd.DataFrame, bytes]:
