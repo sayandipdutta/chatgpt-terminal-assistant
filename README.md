@@ -11,7 +11,8 @@ OpenAI's ChatGPT as a terminal assistant.
 5. Run the program from the directory where you cloned the repo, `python assistant.py`.
 
 *Note: This program uses OpenAI ChatCompletion API. Check out the [pricing](https://openai.com/pricing) at their website. 
-At the time of writing this, 'gpt-3.5-turbo' costs `$0.002 for every 1000 tokens`.
+At the time of writing this, 'gpt-3.5-turbo' costs `$0.002 for every 1000 tokens`, although, you get a **free $18.00 credit
+for the first three months of sign up, during trial period**.
 
 # Screenshots
 ![Screenshot-1](/media/screenshot3.png)
